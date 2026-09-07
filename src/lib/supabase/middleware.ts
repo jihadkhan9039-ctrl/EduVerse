@@ -14,27 +14,25 @@ export async function updateSession(request: NextRequest) {
         getAll() {
           return request.cookies.getAll();
         },
-        setAll(cookiesToSet: { name: string; value: string; options?: any }[]) {
-          cookiesToSet.forEach(({ name, value }) =>
-            request.cookies.set(name, value)
+        setAll(cookiesToSet) {
+          cookiesToSet.forEach((cookie) =>
+            request.cookies.set(cookie.name, cookie.value)
           );
           supabaseResponse = NextResponse.next({
             request,
           });
-          cookiesToSet.forEach(({ name, value, options }) =>
-            supabaseResponse.cookies.set(name, value, options)
+          cookiesToSet.forEach((cookie) =>
+            supabaseResponse.cookies.set(cookie.name, cookie.value, cookie.options)
           );
         },
       },
     }
   );
 
-  // Refresh session
   const {
     data: { user },
   } = await supabase.auth.getUser();
 
-  // Protect admin routes
   if (request.nextUrl.pathname.startsWith("/admin")) {
     if (!user) {
       const url = request.nextUrl.clone();
@@ -43,7 +41,6 @@ export async function updateSession(request: NextRequest) {
       return NextResponse.redirect(url);
     }
 
-    // Check role
     const { data: profile } = await supabase
       .from("profiles")
       .select("role")
@@ -57,7 +54,6 @@ export async function updateSession(request: NextRequest) {
     }
   }
 
-  // Protect auth pages when already logged in
   if (
     user &&
     (request.nextUrl.pathname === "/login" ||
