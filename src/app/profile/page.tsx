@@ -6,15 +6,20 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 import { Header } from "@/components/header";
 import { MobileNav } from "@/components/mobile-nav";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { BookOpen, ShoppingBag, LogOut, User } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { BookOpen, ShoppingBag, LogOut, User, Pencil } from "lucide-react";
 import type { Profile } from "@/types/database";
 
 export default function ProfilePage() {
   const router = useRouter();
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
+  const [editing, setEditing] = useState(false);
+  const [name, setName] = useState("");
+  const [saving, setSaving] = useState(false);
+  const [message, setMessage] = useState<string | null>(null);
 
   useEffect(() => {
     async function load() {
@@ -35,10 +40,34 @@ export default function ProfilePage() {
         .single();
 
       setProfile(data);
+      setName(data?.full_name || "");
       setLoading(false);
     }
     load();
   }, [router]);
+
+  async function handleSaveName(e: React.FormEvent) {
+    e.preventDefault();
+    if (!profile || !name.trim()) return;
+    setSaving(true);
+    setMessage(null);
+
+    const supabase = createClient();
+    const { error } = await supabase
+      .from("profiles")
+      .update({ full_name: name.trim() })
+      .eq("id", profile.id);
+
+    if (error) {
+      setMessage("Failed to update name");
+    } else {
+      setProfile({ ...profile, full_name: name.trim() });
+      setEditing(false);
+      setMessage("Name updated successfully");
+      setTimeout(() => setMessage(null), 2500);
+    }
+    setSaving(false);
+  }
 
   async function handleLogout() {
     const supabase = createClient();
@@ -80,6 +109,60 @@ export default function ProfilePage() {
             <span className="mt-2 rounded-full bg-brand-50 px-3 py-0.5 text-xs font-medium capitalize text-brand-700">
               {profile?.role}
             </span>
+          </CardContent>
+        </Card>
+
+        {/* Edit Name */}
+        <Card className="mb-6">
+          <CardHeader className="pb-2">
+            <CardTitle className="flex items-center gap-2 text-base">
+              <Pencil className="h-4 w-4" />
+              Change Name
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            {editing ? (
+              <form onSubmit={handleSaveName} className="space-y-3">
+                <Input
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  placeholder="Your full name"
+                  required
+                />
+                <div className="flex gap-2">
+                  <Button type="submit" size="sm" disabled={saving}>
+                    {saving ? "Saving..." : "Save"}
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                      setEditing(false);
+                      setName(profile?.full_name || "");
+                    }}
+                  >
+                    Cancel
+                  </Button>
+                </div>
+              </form>
+            ) : (
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-gray-700">
+                  {profile?.full_name || "No name set"}
+                </span>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setEditing(true)}
+                >
+                  Edit
+                </Button>
+              </div>
+            )}
+            {message && (
+              <p className="mt-2 text-sm text-emerald-600">{message}</p>
+            )}
           </CardContent>
         </Card>
 
