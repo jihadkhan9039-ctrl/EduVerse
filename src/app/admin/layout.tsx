@@ -15,6 +15,7 @@ const nav = [
   { href: "/admin/categories", label: "Categories", icon: FolderOpen },
   { href: "/admin/courses", label: "Courses", icon: BookOpen },
   { href: "/admin/tokens", label: "Access Tokens", icon: Key },
+  { href: "/admin/notifications", label: "Notifications", icon: Bell },
   { href: "/admin/users", label: "Users", icon: Users },
 ];
 

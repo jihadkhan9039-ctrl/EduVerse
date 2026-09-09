@@ -36,10 +36,11 @@ export function Header({ title, userName }: HeaderProps) {
               Hi, {userName.split(" ")[0]}
             </span>
           )}
-          <Button variant="ghost" size="icon" className="relative">
-            <Bell className="h-5 w-5 text-gray-600" />
-            <span className="absolute right-1.5 top-1.5 h-2 w-2 rounded-full bg-red-500" />
-          </Button>
+          <Link href="/notifications">
+            <Button variant="ghost" size="icon" className="relative">
+              <Bell className="h-5 w-5 text-gray-600" />
+            </Button>
+          </Link>
         </div>
       </div>
     </header>
