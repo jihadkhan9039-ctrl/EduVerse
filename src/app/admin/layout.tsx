@@ -5,6 +5,7 @@ import {
   BookOpen,
   FolderOpen,
   Key,
+  Bell,
   Users,
   ArrowLeft,
 } from "lucide-react";
