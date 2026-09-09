@@ -77,7 +77,7 @@ export default async function LessonPlayerPage({
 
   // youtube-nocookie + controls=0 + modestbranding + disablekb to reduce link exposure
   const embedUrl = lesson.youtube_video_id
-    ? `https://www.youtube-nocookie.com/embed/${lesson.youtube_video_id}?rel=0&modestbranding=1&controls=1&disablekb=1&fs=1&iv_load_policy=3`
+    ? `https://www.youtube.com/embed/${lesson.youtube_video_id}?rel=0&modestbranding=1`
     : null;
 
   return (
@@ -102,21 +102,14 @@ export default async function LessonPlayerPage({
           </span>
         </div>
 
-        {/* Video — no visible YouTube link */}
         {embedUrl ? (
-          <div className="relative mb-5 aspect-video overflow-hidden rounded-2xl bg-black">
+          <div className="mb-5 aspect-video overflow-hidden rounded-2xl bg-black">
             <iframe
               src={embedUrl}
               title={lesson.title}
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
               allowFullScreen
               className="h-full w-full border-0"
-              referrerPolicy="no-referrer"
-            />
-            {/* Overlay to discourage right-click / easy link copy */}
-            <div
-              className="pointer-events-none absolute inset-0"
-              style={{ background: "transparent" }}
             />
           </div>
         ) : (
