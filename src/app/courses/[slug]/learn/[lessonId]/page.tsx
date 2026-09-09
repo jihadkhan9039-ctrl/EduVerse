@@ -77,7 +77,7 @@ export default async function LessonPlayerPage({
 
   // youtube-nocookie + controls=0 + modestbranding + disablekb to reduce link exposure
   const embedUrl = lesson.youtube_video_id
-    ? `https://www.youtube.com/embed/${lesson.youtube_video_id}?rel=0&modestbranding=1`
+    ? `https://www.youtube.com/embed/${lesson.youtube_video_id}?rel=0&modestbranding=1&autoplay=1&mute=1&playsinline=1&iv_load_policy=3`
     : null;
 
   return (
@@ -103,14 +103,16 @@ export default async function LessonPlayerPage({
         </div>
 
         {embedUrl ? (
-          <div className="mb-5 aspect-video overflow-hidden rounded-2xl bg-black">
+          <div className="relative mb-5 aspect-video overflow-hidden rounded-2xl bg-black">
             <iframe
               src={embedUrl}
               title={lesson.title}
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
               allowFullScreen
               className="h-full w-full border-0"
             />
+            {/* Soft cover over bottom YouTube branding/share area */}
+            <div className="pointer-events-none absolute bottom-0 left-0 right-0 h-10 bg-gradient-to-t from-black/40 to-transparent" />
           </div>
         ) : (
           <Card className="mb-5">
