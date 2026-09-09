@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
-import { ArrowLeft, PlayCircle, ChevronRight, Lock } from "lucide-react";
+import { ArrowLeft, ChevronRight, BookOpen } from "lucide-react";
 import { Header } from "@/components/header";
 import { MobileNav } from "@/components/mobile-nav";
 import { Card, CardContent } from "@/components/ui/card";
@@ -30,7 +30,6 @@ export default async function LearnPage({
 
   if (!course) notFound();
 
-  // Check enrollment
   const { data: enrollment } = await supabase
     .from("enrollments")
     .select("id")
@@ -42,27 +41,10 @@ export default async function LearnPage({
     redirect(`/courses/${slug}`);
   }
 
-  // Get subjects with chapters and lessons
+  // Only subjects — no nested chapters/lessons here
   const { data: subjects } = await supabase
     .from("subjects")
-    .select(`
-      id,
-      title,
-      sort_order,
-      chapters (
-        id,
-        title,
-        sort_order,
-        lessons (
-          id,
-          title,
-          published,
-          youtube_video_id,
-          duration_minutes,
-          sort_order
-        )
-      )
-    `)
+    .select("id, title, sort_order")
     .eq("course_id", course.id)
     .order("sort_order", { ascending: true });
 
@@ -83,66 +65,28 @@ export default async function LearnPage({
         {!subjects || subjects.length === 0 ? (
           <Card>
             <CardContent className="p-8 text-center text-sm text-gray-500">
-              No content available yet.
+              No subjects available yet.
             </CardContent>
           </Card>
         ) : (
-          <div className="space-y-6">
-            {subjects.map((subject: any) => (
-              <div key={subject.id}>
-                <h2 className="mb-3 text-base font-semibold text-gray-900">
-                  {subject.title}
-                </h2>
-                <div className="space-y-2">
-                  {(subject.chapters || [])
-                    .sort((a: any, b: any) => a.sort_order - b.sort_order)
-                    .map((chapter: any) => (
-                      <Card key={chapter.id}>
-                        <CardContent className="p-0">
-                          <div className="border-b border-gray-100 px-4 py-3">
-                            <p className="text-sm font-medium text-gray-800">
-                              {chapter.title}
-                            </p>
-                          </div>
-                          <div className="divide-y divide-gray-50">
-                            {(chapter.lessons || [])
-                              .filter((l: any) => l.published)
-                              .sort((a: any, b: any) => a.sort_order - b.sort_order)
-                              .map((lesson: any) => (
-                                <Link
-                                  key={lesson.id}
-                                  href={`/courses/${slug}/learn/${lesson.id}`}
-                                  className="flex items-center gap-3 px-4 py-3 hover:bg-gray-50"
-                                >
-                                  {lesson.youtube_video_id ? (
-                                    <PlayCircle className="h-5 w-5 shrink-0 text-brand-600" />
-                                  ) : (
-                                    <Lock className="h-5 w-5 shrink-0 text-gray-300" />
-                                  )}
-                                  <div className="min-w-0 flex-1">
-                                    <p className="truncate text-sm font-medium text-gray-900">
-                                      {lesson.title}
-                                    </p>
-                                    {lesson.duration_minutes && (
-                                      <p className="text-xs text-gray-500">
-                                        {lesson.duration_minutes} min
-                                      </p>
-                                    )}
-                                  </div>
-                                  <ChevronRight className="h-4 w-4 shrink-0 text-gray-400" />
-                                </Link>
-                              ))}
-                            {(chapter.lessons || []).filter((l: any) => l.published).length === 0 && (
-                              <p className="px-4 py-3 text-xs text-gray-400">
-                                No published lessons
-                              </p>
-                            )}
-                          </div>
-                        </CardContent>
-                      </Card>
-                    ))}
-                </div>
-              </div>
+          <div className="space-y-2">
+            {subjects.map((subject) => (
+              <Link
+                key={subject.id}
+                href={`/courses/${slug}/learn/subject/${subject.id}`}
+              >
+                <Card className="transition-shadow hover:shadow-md">
+                  <CardContent className="flex items-center gap-3 p-4">
+                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-brand-50 text-brand-600">
+                      <BookOpen className="h-5 w-5" />
+                    </div>
+                    <span className="flex-1 font-medium text-gray-900">
+                      {subject.title}
+                    </span>
+                    <ChevronRight className="h-5 w-5 text-gray-400" />
+                  </CardContent>
+                </Card>
+              </Link>
             ))}
           </div>
         )}
